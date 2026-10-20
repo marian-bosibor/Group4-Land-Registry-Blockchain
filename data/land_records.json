@@ -1,0 +1,48 @@
+[
+  {
+    "parcel_id": "KEN-NAI-001",
+    "transaction": "OWNERSHIP_TRANSFER",
+    "previous_owner": "OWNER-001",
+    "new_owner": "OWNER-002"
+  },
+  {
+    "parcel_id": "KEN-NAI-002",
+    "transaction": "CHARGE_REGISTRATION",
+    "owner": "OWNER-003",
+    "institution": "BANK-001"
+  },
+  {
+    "parcel_id": "KEN-NAI-003",
+    "transaction": "OWNERSHIP_TRANSFER",
+    "previous_owner": "OWNER-004",
+    "new_owner": "OWNER-005"
+  },
+  {
+    "parcel_id": "KEN-NAI-004",
+    "transaction": "CAVEAT_REGISTRATION",
+    "owner": "OWNER-006"
+  },
+  {
+    "parcel_id": "KEN-NAI-005",
+    "transaction": "OWNERSHIP_TRANSFER",
+    "previous_owner": "OWNER-007",
+    "new_owner": "OWNER-008"
+  },
+  {
+    "parcel_id": "KEN-NAI-006",
+    "transaction": "SURVEY_UPDATE",
+    "surveyor": "SURVEYOR-001"
+  },
+  {
+    "parcel_id": "KEN-NAI-007",
+    "transaction": "CHARGE_DISCHARGE",
+    "owner": "OWNER-009",
+    "institution": "BANK-002"
+  },
+  {
+    "parcel_id": "KEN-NAI-008",
+    "transaction": "OWNERSHIP_TRANSFER",
+    "previous_owner": "OWNER-010",
+    "new_owner": "OWNER-011"
+  }
+]
