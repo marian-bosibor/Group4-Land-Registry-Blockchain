@@ -1,0 +1,234 @@
+﻿
+========================================================================
+1. PARTICIPANTS (address = hash160 of the compressed public key)
+========================================================================
+seller   public key 037c9854decb54eab35f..  address 05baeca31688e65140f7c60b7726b056395f2ace
+buyer    public key 026f00d4fa943ac64676..  address 5ee5e63e5e1c878f3def9ce6aebef611a5a89d5a
+miner_a  public key 03d788f126ec36068cd1..  address 5138e341fbe05232b1e27b36697127fe5349ac2a
+miner_b  public key 024a696dfab36eaa0b08..  address 359b18184b096aa7b8b951a3152c3265ff4364e2
+
+========================================================================
+2. TRANSACTIONS
+========================================================================
+Genesis coinbase (initial output standing for a title already held by the seller):
+{
+  "transaction_id": "fc9d9e0e010b88cdcec4a602a396f72233fb207657c0b3a8e83088a8886ee296",
+  "inputs": [],
+  "outputs": [
+    {
+      "amount": 50,
+      "address": "05baeca31688e65140f7c60b7726b056395f2ace"
+    }
+  ],
+  "type": "coinbase",
+  "block_height": 0,
+  "block_reward": 50,
+  "transaction_fees": 0
+}
+
+Ordinary transaction (land-title transfer seller -> buyer, signed with ECDSA):
+{
+  "transaction_id": "f231ea7d3784bf3701d9172c3f544080524ed6bcdafd18ecaca6e2000df41c56",
+  "inputs": [
+    {
+      "previous_txid": "fc9d9e0e010b88cdcec4a602a396f72233fb207657c0b3a8e83088a8886ee296",
+      "output_index": 0,
+      "signature": "30450221008bbba4a6278585a6a1a828515d35c61596aefde65ccbe3a2b1369071bafab884022056e3db8b724f65b0a6c38e794e5c8ab2dcb2d2973e085373c39ce05ba9fae94a",
+      "public_key": "037c9854decb54eab35f00d869716a7949b61631162f783391ca010118420df200"
+    }
+  ],
+  "outputs": [
+    {
+      "amount": 49,
+      "address": "5ee5e63e5e1c878f3def9ce6aebef611a5a89d5a"
+    }
+  ]
+}
+
+========================================================================
+3. P2PKH SCRIPT EXECUTION (stack after every step)
+========================================================================
+
+========================================================================
+SUCCESS: genuine spend by the seller
+========================================================================
+ 1. PUSH unlocking item 1        stack: [<30450221..(71B)>]
+ 2. PUSH unlocking item 2        stack: [<30450221..(71B)>, <037c9854..(33B)>]
+ 3. OP_DUP                       stack: [<30450221..(71B)>, <037c9854..(33B)>, <037c9854..(33B)>]
+ 4. OP_HASH160                   stack: [<30450221..(71B)>, <037c9854..(33B)>, <05baeca3..(20B)>]
+ 5. PUSH <pubKeyHash>            stack: [<30450221..(71B)>, <037c9854..(33B)>, <05baeca3..(20B)>, <05baeca3..(20B)>]
+ 6. OP_EQUALVERIFY               stack: [<30450221..(71B)>, <037c9854..(33B)>]
+ 7. OP_CHECKSIG                  stack: [<01>]
+-> ACCEPTED: valid spend
+
+========================================================================
+FAILURE 1: wrong public key (attacker supplies their own key and signature)
+========================================================================
+ 1. PUSH unlocking item 1        stack: [<30440220..(70B)>]
+ 2. PUSH unlocking item 2        stack: [<30440220..(70B)>, <03e0c6c9..(33B)>]
+ 3. OP_DUP                       stack: [<30440220..(70B)>, <03e0c6c9..(33B)>, <03e0c6c9..(33B)>]
+ 4. OP_HASH160                   stack: [<30440220..(70B)>, <03e0c6c9..(33B)>, <6431f42b..(20B)>]
+ 5. PUSH <pubKeyHash>            stack: [<30440220..(70B)>, <03e0c6c9..(33B)>, <6431f42b..(20B)>, <05baeca3..(20B)>]
+ 6. OP_EQUALVERIFY  -> FAIL      stack: [<30440220..(70B)>, <03e0c6c9..(33B)>]
+-> REJECTED at OP_EQUALVERIFY: hash of the supplied public key does not match the locking script
+
+========================================================================
+FAILURE 2: transaction altered after signing (output amount 49 -> 50)
+========================================================================
+ 1. PUSH unlocking item 1        stack: [<30450221..(71B)>]
+ 2. PUSH unlocking item 2        stack: [<30450221..(71B)>, <037c9854..(33B)>]
+ 3. OP_DUP                       stack: [<30450221..(71B)>, <037c9854..(33B)>, <037c9854..(33B)>]
+ 4. OP_HASH160                   stack: [<30450221..(71B)>, <037c9854..(33B)>, <05baeca3..(20B)>]
+ 5. PUSH <pubKeyHash>            stack: [<30450221..(71B)>, <037c9854..(33B)>, <05baeca3..(20B)>, <05baeca3..(20B)>]
+ 6. OP_EQUALVERIFY               stack: [<30450221..(71B)>, <037c9854..(33B)>]
+ 7. OP_CHECKSIG  -> FAIL         stack: []
+-> REJECTED at OP_CHECKSIG: signature does not match this key and transaction
+
+========================================================================
+4. MINING (difficulty = leading zeros; Member 5's block code)
+========================================================================
+Genesis block: coinbase-like allocation of the Seller's initial output
+  Mined block 0: difficulty=3, nonce=202, attempts=203, time=0.001s
+  Hash: 000a8740c2b8996773b19673292f87482e7e1686052d51dbd6d893d72c4112c8
+
+Block 1 (coinbase only):
+  Mined block 1: difficulty=3, nonce=2851, attempts=2852, time=0.021s
+  Hash: 00071d315affc93bb476e29c3f2c0e1fe4b0b8cb0b47c6ac811ac9c6965a468d
+
+Block 2 (coinbase + Seller -> Buyer land-title transfer):
+  P2PKH script check for the transfer: True
+  Mined block 2: difficulty=3, nonce=724, attempts=725, time=0.005s
+  Hash: 00057382154f32e037ff523e8c06c885b291423d1e6fca5eb46abf614abfddfe
+
+Block 3 (coinbase only):
+  Mined block 3: difficulty=3, nonce=15041, attempts=15042, time=0.111s
+  Hash: 0005411354f8aca244f41ff7b331c2641b496c4c70e10c41a82ec5a3b1db6c84
+block 0: difficulty 3, nonce 202, attempts 203, hash 000a8740c2b8996773b19673292f87482e7e1686052d51dbd6d893d72c4112c8
+block 1: difficulty 3, nonce 2851, attempts 2852, hash 00071d315affc93bb476e29c3f2c0e1fe4b0b8cb0b47c6ac811ac9c6965a468d
+block 2: difficulty 3, nonce 724, attempts 725, hash 00057382154f32e037ff523e8c06c885b291423d1e6fca5eb46abf614abfddfe
+block 3: difficulty 3, nonce 15041, attempts 15042, hash 0005411354f8aca244f41ff7b331c2641b496c4c70e10c41a82ec5a3b1db6c84
+
+========================================================================
+5. CHAIN VALIDATION
+========================================================================
+Block 0:
+  [PASS] merkle_root       stored e12206c709c37acb.. vs recomputed e12206c709c37acb..
+  [PASS] block_hash        stored 000a8740c2b89967.. vs recomputed 000a8740c2b89967..
+  [PASS] difficulty        hash 000a8740c2.. needs 3 leading zeros (network minimum 3)
+  [PASS] height            height 0, position 0
+  [PASS] previous_hash     stored 0000000000000000.. vs expected 0000000000000000..
+  [PASS] coinbase_position first tx is the only coinbase
+  [PASS] txid              coinbase fc9d9e0e..: stored id matches contents
+  [PASS] coinbase_height   coinbase says height 0, block height 0
+  [PASS] coinbase_miner    coinbase has no inputs and pays the block's miner
+  [PASS] coinbase_amount   pays 50, allowed 50 (reward 50 + fees 0)
+Block 1:
+  [PASS] merkle_root       stored 11621d778428843e.. vs recomputed 11621d778428843e..
+  [PASS] block_hash        stored 00071d315affc93b.. vs recomputed 00071d315affc93b..
+  [PASS] difficulty        hash 00071d315a.. needs 3 leading zeros (network minimum 3)
+  [PASS] height            height 1, position 1
+  [PASS] previous_hash     stored 000a8740c2b89967.. vs expected 000a8740c2b89967..
+  [PASS] coinbase_position first tx is the only coinbase
+  [PASS] txid              coinbase c6a78f4f..: stored id matches contents
+  [PASS] coinbase_height   coinbase says height 1, block height 1
+  [PASS] coinbase_miner    coinbase has no inputs and pays the block's miner
+  [PASS] coinbase_amount   pays 50, allowed 50 (reward 50 + fees 0)
+Block 2:
+  [PASS] merkle_root       stored 26e4f570000847cb.. vs recomputed 26e4f570000847cb..
+  [PASS] block_hash        stored 00057382154f32e0.. vs recomputed 00057382154f32e0..
+  [PASS] difficulty        hash 0005738215.. needs 3 leading zeros (network minimum 3)
+  [PASS] height            height 2, position 2
+  [PASS] previous_hash     stored 00071d315affc93b.. vs expected 00071d315affc93b..
+  [PASS] coinbase_position first tx is the only coinbase
+  [PASS] txid              tx f231ea7d..: stored id matches contents
+  [PASS] inputs_unspent    tx f231ea7d..: all inputs refer to earlier unspent outputs
+  [PASS] scripts           tx f231ea7d..: unlocking + locking scripts succeed
+  [PASS] value_balance     tx f231ea7d..: inputs 50, outputs 49, fee 1
+  [PASS] txid              coinbase e80c727b..: stored id matches contents
+  [PASS] coinbase_height   coinbase says height 2, block height 2
+  [PASS] coinbase_miner    coinbase has no inputs and pays the block's miner
+  [PASS] coinbase_amount   pays 51, allowed 51 (reward 50 + fees 1)
+Block 3:
+  [PASS] merkle_root       stored 1a982828b992b514.. vs recomputed 1a982828b992b514..
+  [PASS] block_hash        stored 0005411354f8aca2.. vs recomputed 0005411354f8aca2..
+  [PASS] difficulty        hash 0005411354.. needs 3 leading zeros (network minimum 3)
+  [PASS] height            height 3, position 3
+  [PASS] previous_hash     stored 00057382154f32e0.. vs expected 00057382154f32e0..
+  [PASS] coinbase_position first tx is the only coinbase
+  [PASS] txid              coinbase 48ee5180..: stored id matches contents
+  [PASS] coinbase_height   coinbase says height 3, block height 3
+  [PASS] coinbase_miner    coinbase has no inputs and pays the block's miner
+  [PASS] coinbase_amount   pays 50, allowed 50 (reward 50 + fees 0)
+
+CHAIN VALID - all 44 checks passed
+========================================================================
+PART 1 - THE HONEST CHAIN
+========================================================================
+CHAIN VALID - all 44 checks passed
+Blocks: #0 000a8740c2.., #1 00071d315a.., #2 0005738215.., #3 0005411354..
+
+========================================================================
+PART 2 - TAMPERING: redirect the title transfer in block 2
+========================================================================
+Field altered : block 2, transfer transaction, output 0 recipient address
+  before      : 5ee5e63e5e1c878f3def9ce6aebef611a5a89d5a   (buyer)
+  after       : 6431f42b570b42b310548f1f96dc1a46a017344b   (attacker)
+
+CHAIN INVALID - 4 of 44 checks failed; first failure: 'merkle_root' in block 2
+
+Block 2 Merkle root
+  stored in header : 26e4f570000847cbdae46d3e1de4bb86d6906cdee38a1118f7f6b69b63143b4f
+  recomputed       : 4b7d65469c9221f4647a4aeb10cb511683d2388b6b1ea9a7b6e84aa79fd02a21
+  -> MISMATCH: the 'merkle_root' check caught the change.
+  (block 2's own hash check still says: PASS - the header was not touched, so only the Merkle root exposes the edit)
+
+All failed checks:
+      - block 2 merkle_root: stored 26e4f570000847cb.. vs recomputed 4b7d65469c9221f4..
+      - block 2 txid: tx f231ea7d..: stored id DIFFERS from contents
+      - block 2 scripts: tx f231ea7d..: input 0: rejected at OP_CHECKSIG - signature does not match this key and transaction
+      - block 2 coinbase_amount: pays 51, allowed 50 (reward 50 + fees 0)
+  Note: 'coinbase_amount' fails only as a side effect. The tampered transfer is rejected,
+  so its fee is no longer collected and the coinbase now claims more than it is owed.
+
+========================================================================
+PART 3 - THE ATTACKER TRIES TO HIDE IT
+========================================================================
+Step a) fix the transaction id and the Merkle root in block 2's header
+   CHAIN INVALID - 3 of 44 checks failed; first failure: 'block_hash' in block 2
+      - block 2 block_hash: stored 00057382154f32e0.. vs recomputed 74d6165ceebc1df1..
+      - block 2 scripts: tx b15de506..: input 0: rejected at OP_CHECKSIG - signature does not match this key and transaction
+      - block 2 coinbase_amount: pays 51, allowed 50 (reward 50 + fees 0)
+
+Step b) also recompute block 2's hash, but do no mining
+   CHAIN INVALID - 4 of 44 checks failed; first failure: 'difficulty' in block 2
+      - block 2 difficulty: hash 74d6165cee.. needs 3 leading zeros (network minimum 3)
+      - block 2 scripts: tx b15de506..: input 0: rejected at OP_CHECKSIG - signature does not match this key and transaction
+      - block 2 coinbase_amount: pays 51, allowed 50 (reward 50 + fees 0)
+      ... and 1 more
+
+Step c) re-mine block 2 (2115 attempts) so its header and proof of work are valid
+   CHAIN INVALID - 3 of 44 checks failed; first failure: 'scripts' in block 2
+      - block 2 scripts: tx b15de506..: input 0: rejected at OP_CHECKSIG - signature does not match this key and transaction
+      - block 2 coinbase_amount: pays 51, allowed 50 (reward 50 + fees 0)
+      - block 3 previous_hash: stored 00057382154f32e0.. vs expected 000755866b274404..
+
+Step d) re-mine every later block too (4564 more attempts)
+   CHAIN INVALID - 2 of 44 checks failed; first failure: 'scripts' in block 2
+      - block 2 scripts: tx b15de506..: input 0: rejected at OP_CHECKSIG - signature does not match this key and transaction
+      - block 2 coinbase_amount: pays 51, allowed 50 (reward 50 + fees 0)
+   -> Block headers, hashes and links are now all consistent, yet the chain is still
+      invalid: the transfer's signature covered the old recipient, and forging a new
+      one needs the seller's PRIVATE KEY. Proof of work cannot supply that.
+
+========================================================================
+PART 4 - WHAT REWRITING HISTORY COSTS
+========================================================================
+Edit: block 1 coinbase payout redirected to the attacker (a coinbase carries no signature).
+  Without redoing the work : CHAIN INVALID - 1 of 44 checks failed; first failure: 'merkle_root' in block 1
+  After re-mining blocks 1-3  : CHAIN VALID - all 44 checks passed
+  Attacker's work          : [1314, 1594, 6278] attempts per block, 9186 in total
+  Honest network's work    : [2852, 725, 15042] attempts for the same blocks
+  Expected work per block  : about 16^3 = 4096 hashes at this toy difficulty;
+  the attacker must also finish before honest miners add the next block, and every
+  extra zero of difficulty multiplies the cost by about 16. Nothing physically stops
+  the edit - it is made expensive and obvious, which is what immutability means here.
